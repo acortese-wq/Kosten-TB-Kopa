@@ -3358,8 +3358,11 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     autoSendTimer = setTimeout(function () {
       if ($("#voiceText").value.trim() && !$("#voiceFill").disabled) {
         $("#voiceFill").click();
-        baseText = ""; finalizedSoFar = ""; finalizedCount = 0;
-        if (recognizing && rec) { try { rec.stop(); } catch (e) {} } // onend startet automatisch neu, ev.results wird dadurch zurückgesetzt
+        // Nur den sichtbaren Text zurücksetzen, NICHT finalizedCount: die Erkennung läuft ununterbrochen
+        // weiter (kein stop/start), ev.results wächst also nur an, der Zeiger muss mitwachsen statt
+        // auf 0 zu springen – sonst würde ein verspätetes onresult-Event aus der alten Sitzung den
+        // bereits gesendeten Text erneut ins Feld schreiben (Race Condition).
+        baseText = ""; finalizedSoFar = "";
       }
     }, 1200);
   }
@@ -3424,7 +3427,8 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       if (!key && !sharedAvailable) { $("#voiceStatus").textContent = tt("noKey"); return; }
       if (!text) { $("#voiceStatus").textContent = tt("noText"); return; }
       addBubble("user", text);
-      $("#voiceText").value = ""; baseText = ""; finalizedSoFar = ""; finalizedCount = 0;
+      $("#voiceText").value = ""; baseText = ""; finalizedSoFar = "";
+      if (!recognizing) finalizedCount = 0; // bei laufender Erkennung den Zeiger NICHT zurücksetzen (Race Condition, siehe scheduleAutoSend)
       $("#voiceStatus").textContent = tt("working"); $("#voiceFill").disabled = true;
       callLLM(key, model, text).then(function (json) {
         $("#voiceDebugOut").textContent = JSON.stringify(json, null, 1);
@@ -3445,10 +3449,12 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     };
     $("#voiceReset").onclick = function () {
       resetVoiceHistory(); resetVoiceElemMap();
-      clearTimeout(autoSendTimer); baseText = ""; finalizedSoFar = ""; finalizedCount = 0;
+      clearTimeout(autoSendTimer); baseText = ""; finalizedSoFar = "";
+      if (recognizing) { recognizing = false; try { rec.stop(); } catch (e) {} } // sauber stoppen statt mittendrin den Zeiger zu kappen
+      finalizedCount = 0;
       $("#voiceText").value = "";
       $("#voiceDebugOut").textContent = ""; $("#voiceStatus").textContent = "";
-      greet();
+      applyTexts(); greet();
     };
     $("#voiceText").addEventListener("keydown", function (ev) {
       if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); $("#voiceFill").click(); }
