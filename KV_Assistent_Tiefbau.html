@@ -3398,7 +3398,28 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       if (ev.error === "no-speech" || ev.error === "aborted") return; // normal bei kurzen Pausen, onend startet neu
       $("#voiceStatus").textContent = tt("err") + ev.error; recognizing = false; applyTexts();
     };
-    rec.onend = function () { if (recognizing) { try { rec.start(); } catch (e) {} } };
+    rec.onend = function () {
+      if (!recognizing) return;
+      // Sofortiger Neustart derselben Instanz schlägt auf vielen Browsern (v.a. iPad/Safari)
+      // mit einem stillen Fehler fehl – kleine Verzögerung, und als Fallback eine frische
+      // Recognition-Instanz aufbauen, statt das Mikro unbemerkt sterben zu lassen.
+      setTimeout(function () {
+        if (!recognizing) return;
+        try {
+          rec.start();
+        } catch (e) {
+          try {
+            setupRecognition();
+            rec.lang = SPEECH_LANG[curLang()] || "de-CH";
+            rec.start();
+          } catch (e2) {
+            recognizing = false;
+            $("#voiceStatus").textContent = tt("err") + "restart";
+            applyTexts();
+          }
+        }
+      }, 300);
+    };
   }
 
   function toggleMic() {
