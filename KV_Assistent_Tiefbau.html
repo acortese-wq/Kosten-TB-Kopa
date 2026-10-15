@@ -666,13 +666,13 @@ body.summary-print .summary-only { display: block; }
             <p id="l_voiceSharedHint" style="margin:3px 0 0;font-size:11.5px;color:var(--ink-soft)"></p>
           </div>
           <div id="voiceChat" style="display:flex;flex-direction:column;gap:7px;max-height:260px;overflow-y:auto;margin-bottom:10px"></div>
-          <div class="field">
-            <label id="l_voiceText">Projekt beschreiben (sprechen oder tippen)</label>
-            <textarea id="voiceText" rows="3" placeholder="z.B. Leitungsgraben 80 m lang, Breite nach VSE, Tiefe 1.10 m, Rohrsystem K55 1x PE55, Belag Asphalt Typ N..."></textarea>
+          <label id="l_voiceText" style="display:block;font-size:13px;color:var(--ink-soft);margin-bottom:4px">Nachricht (sprechen oder tippen)</label>
+          <div style="display:flex;gap:8px;align-items:flex-end">
+            <textarea id="voiceText" rows="2" style="flex:1" placeholder="z.B. Leitungsgraben 80 m lang, Breite nach VSE, Tiefe 1.10 m, Rohrsystem K55 1x PE55, Belag Asphalt Typ N..."></textarea>
+            <button type="button" class="btn ghost" id="voiceMic" title="Spracheingabe" aria-pressed="false" style="flex:0 0 auto;padding:9px 12px">🎤</button>
+            <button type="button" class="btn" id="voiceFill" style="flex:0 0 auto">Senden</button>
           </div>
-          <div class="btns" style="margin-top:0;align-items:center">
-            <button type="button" class="btn ghost" id="voiceMic">🎤 <span id="l_voiceMicStart">Aufnahme starten</span></button>
-            <button type="button" class="btn" id="voiceFill">Senden</button>
+          <div class="btns" style="margin-top:6px;align-items:center">
             <button type="button" class="btn ghost small" id="voiceReset">Neu starten</button>
             <span id="voiceStatus" style="font-size:12.5px;color:var(--ink-soft)"></span>
           </div>
@@ -3130,7 +3130,7 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
 
   var TXT = {
     de: { title: "🎤 Spracheingabe (KI-gestützt)", key: "OpenAI API-Key", keyHint: "Wird nur lokal in diesem Browser gespeichert (localStorage) und direkt an OpenAI gesendet – nie an Dritte.",
-      save: "Speichern", saved: "Gespeichert.", text: "Projekt beschreiben (sprechen oder tippen)",
+      save: "Speichern", saved: "Gespeichert.", text: "Nachricht (sprechen oder tippen)",
       micStart: "Aufnahme starten", micStop: "Aufnahme stoppen", fill: "Senden", debug: "KI-Antwort anzeigen (Diagnose)",
       noKey: "Bitte zuerst einen OpenAI API-Key eintragen und speichern.", noText: "Bitte zuerst einen Text eingeben oder diktieren.",
       working: "Anfrage an KI läuft…", noSpeech: "Spracherkennung wird von diesem Browser nicht unterstützt (z.B. Firefox) – Text kann trotzdem eingegeben werden.",
@@ -3138,7 +3138,7 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       dialogDone: "Danke, das reicht für diese Angaben. Sie können jederzeit weitere Angaben ergänzen (z.B. einen weiteren Graben oder Schacht).", reset: "Neu starten",
       sharedOn: "Kein eigener Key nötig: Ohne Eingabe wird der gemeinsame Zugang dieses Projekts verwendet." },
     fr: { title: "🎤 Saisie vocale (IA)", key: "Clé API OpenAI", keyHint: "Stockée uniquement dans ce navigateur (localStorage) et envoyée directement à OpenAI – jamais à des tiers.",
-      save: "Enregistrer", saved: "Enregistré.", text: "Décrire le projet (parler ou taper)",
+      save: "Enregistrer", saved: "Enregistré.", text: "Message (parler ou taper)",
       micStart: "Démarrer l'enregistrement", micStop: "Arrêter l'enregistrement", fill: "Envoyer", debug: "Afficher la réponse de l'IA (diagnostic)",
       noKey: "Veuillez d'abord saisir et enregistrer une clé API OpenAI.", noText: "Veuillez d'abord saisir ou dicter un texte.",
       working: "Requête IA en cours…", noSpeech: "La reconnaissance vocale n'est pas prise en charge par ce navigateur (p.ex. Firefox) – le texte peut être saisi manuellement.",
@@ -3146,7 +3146,7 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       dialogDone: "Merci, cela suffit pour ces informations. Vous pouvez compléter à tout moment (p. ex. une autre tranchée ou un autre regard).", reset: "Redémarrer",
       sharedOn: "Aucune clé requise : sans saisie, l'accès partagé de ce projet est utilisé." },
     it: { title: "🎤 Input vocale (IA)", key: "Chiave API OpenAI", keyHint: "Salvata solo in locale in questo browser (localStorage) e inviata direttamente a OpenAI – mai a terzi.",
-      save: "Salva", saved: "Salvato.", text: "Descrivere il progetto (parlando o scrivendo)",
+      save: "Salva", saved: "Salvato.", text: "Messaggio (parlando o scrivendo)",
       micStart: "Avvia registrazione", micStop: "Ferma registrazione", fill: "Invia", debug: "Mostra risposta IA (diagnostica)",
       noKey: "Inserire e salvare prima una chiave API OpenAI.", noText: "Inserire o dettare prima un testo.",
       working: "Richiesta IA in corso…", noSpeech: "Il riconoscimento vocale non è supportato da questo browser (es. Firefox) – il testo può essere digitato.",
@@ -3154,7 +3154,7 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       dialogDone: "Grazie, basta così per questi dati. Può completare in qualsiasi momento (es. un altro scavo o pozzetto).", reset: "Ricomincia",
       sharedOn: "Nessuna chiave necessaria: senza inserimento viene usato l'accesso condiviso di questo progetto." },
     en: { title: "🎤 Voice input (AI-assisted)", key: "OpenAI API key", keyHint: "Stored only locally in this browser (localStorage) and sent directly to OpenAI – never to third parties.",
-      save: "Save", saved: "Saved.", text: "Describe the project (speak or type)",
+      save: "Save", saved: "Saved.", text: "Message (speak or type)",
       micStart: "Start recording", micStop: "Stop recording", fill: "Send", debug: "Show AI response (diagnostics)",
       noKey: "Please enter and save an OpenAI API key first.", noText: "Please enter or dictate some text first.",
       working: "Contacting AI…", noSpeech: "Speech recognition is not supported by this browser (e.g. Firefox) – text can still be typed.",
@@ -3175,7 +3175,8 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     $("#l_voiceText").textContent = tt("text");
     var sharedAvailable = SHARED_ENDPOINT && SHARED_ENDPOINT.indexOf("http") === 0;
     $("#l_voiceSharedHint").textContent = sharedAvailable ? tt("sharedOn") : "";
-    $("#l_voiceMicStart").textContent = recognizing ? tt("micStop") : tt("micStart");
+    $("#voiceMic").title = recognizing ? tt("micStop") : tt("micStart");
+    $("#voiceMic").style.background = recognizing ? "var(--signal-bg)" : "";
     $("#voiceFill").textContent = tt("fill");
     $("#voiceReset").textContent = tt("reset");
     $("#l_voiceDebug").textContent = tt("debug");
@@ -3421,6 +3422,9 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       $("#voiceChat").innerHTML = ""; $("#voiceText").value = ""; $("#voiceText").dataset.base = "";
       $("#voiceDebugOut").textContent = ""; $("#voiceStatus").textContent = "";
     };
+    $("#voiceText").addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); $("#voiceFill").click(); }
+    });
     document.querySelectorAll(".langs button").forEach(function (b) { b.addEventListener("click", function () { setTimeout(applyTexts, 0); }); });
     setupRecognition();
     applyTexts();
