@@ -665,13 +665,15 @@ body.summary-print .summary-only { display: block; }
             <p id="l_voiceKeyHint" style="margin:5px 0 0;font-size:11.5px;color:var(--ink-soft)"></p>
             <p id="l_voiceSharedHint" style="margin:3px 0 0;font-size:11.5px;color:var(--ink-soft)"></p>
           </div>
+          <div id="voiceChat" style="display:flex;flex-direction:column;gap:7px;max-height:260px;overflow-y:auto;margin-bottom:10px"></div>
           <div class="field">
             <label id="l_voiceText">Projekt beschreiben (sprechen oder tippen)</label>
-            <textarea id="voiceText" rows="4" placeholder="z.B. Leitungsgraben 80 m lang, Breite nach VSE, Tiefe 1.10 m, Rohrsystem K55 1x PE55, Belag Asphalt Typ N..."></textarea>
+            <textarea id="voiceText" rows="3" placeholder="z.B. Leitungsgraben 80 m lang, Breite nach VSE, Tiefe 1.10 m, Rohrsystem K55 1x PE55, Belag Asphalt Typ N..."></textarea>
           </div>
           <div class="btns" style="margin-top:0;align-items:center">
             <button type="button" class="btn ghost" id="voiceMic">🎤 <span id="l_voiceMicStart">Aufnahme starten</span></button>
-            <button type="button" class="btn" id="voiceFill">Felder automatisch ausfüllen</button>
+            <button type="button" class="btn" id="voiceFill">Senden</button>
+            <button type="button" class="btn ghost small" id="voiceReset">Neu starten</button>
             <span id="voiceStatus" style="font-size:12.5px;color:var(--ink-soft)"></span>
           </div>
           <details style="margin-top:10px" id="voiceDebugBox">
@@ -3129,31 +3131,35 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
   var TXT = {
     de: { title: "🎤 Spracheingabe (KI-gestützt)", key: "OpenAI API-Key", keyHint: "Wird nur lokal in diesem Browser gespeichert (localStorage) und direkt an OpenAI gesendet – nie an Dritte.",
       save: "Speichern", saved: "Gespeichert.", text: "Projekt beschreiben (sprechen oder tippen)",
-      micStart: "Aufnahme starten", micStop: "Aufnahme stoppen", fill: "Felder automatisch ausfüllen", debug: "KI-Antwort anzeigen (Diagnose)",
+      micStart: "Aufnahme starten", micStop: "Aufnahme stoppen", fill: "Senden", debug: "KI-Antwort anzeigen (Diagnose)",
       noKey: "Bitte zuerst einen OpenAI API-Key eintragen und speichern.", noText: "Bitte zuerst einen Text eingeben oder diktieren.",
       working: "Anfrage an KI läuft…", noSpeech: "Spracherkennung wird von diesem Browser nicht unterstützt (z.B. Firefox) – Text kann trotzdem eingegeben werden.",
-      done: "Fertig – bitte alle übernommenen Werte vor der Weiterverarbeitung prüfen.", err: "Fehler: ",
+      done: "Fertig – bitte alle übernommenen Werte vor der Weiterverarbeitung prüfen.", err: "Fehler: ", updated: "Übernommen – siehe Rückfrage oben.",
+      dialogDone: "Danke, das reicht für diese Angaben. Sie können jederzeit weitere Angaben ergänzen (z.B. einen weiteren Graben oder Schacht).", reset: "Neu starten",
       sharedOn: "Kein eigener Key nötig: Ohne Eingabe wird der gemeinsame Zugang dieses Projekts verwendet." },
     fr: { title: "🎤 Saisie vocale (IA)", key: "Clé API OpenAI", keyHint: "Stockée uniquement dans ce navigateur (localStorage) et envoyée directement à OpenAI – jamais à des tiers.",
       save: "Enregistrer", saved: "Enregistré.", text: "Décrire le projet (parler ou taper)",
-      micStart: "Démarrer l'enregistrement", micStop: "Arrêter l'enregistrement", fill: "Remplir automatiquement les champs", debug: "Afficher la réponse de l'IA (diagnostic)",
+      micStart: "Démarrer l'enregistrement", micStop: "Arrêter l'enregistrement", fill: "Envoyer", debug: "Afficher la réponse de l'IA (diagnostic)",
       noKey: "Veuillez d'abord saisir et enregistrer une clé API OpenAI.", noText: "Veuillez d'abord saisir ou dicter un texte.",
       working: "Requête IA en cours…", noSpeech: "La reconnaissance vocale n'est pas prise en charge par ce navigateur (p.ex. Firefox) – le texte peut être saisi manuellement.",
-      done: "Terminé – veuillez vérifier toutes les valeurs reprises avant de poursuivre.", err: "Erreur : ",
+      done: "Terminé – veuillez vérifier toutes les valeurs reprises avant de poursuivre.", err: "Erreur : ", updated: "Repris – voir la question ci-dessus.",
+      dialogDone: "Merci, cela suffit pour ces informations. Vous pouvez compléter à tout moment (p. ex. une autre tranchée ou un autre regard).", reset: "Redémarrer",
       sharedOn: "Aucune clé requise : sans saisie, l'accès partagé de ce projet est utilisé." },
     it: { title: "🎤 Input vocale (IA)", key: "Chiave API OpenAI", keyHint: "Salvata solo in locale in questo browser (localStorage) e inviata direttamente a OpenAI – mai a terzi.",
       save: "Salva", saved: "Salvato.", text: "Descrivere il progetto (parlando o scrivendo)",
-      micStart: "Avvia registrazione", micStop: "Ferma registrazione", fill: "Compila automaticamente i campi", debug: "Mostra risposta IA (diagnostica)",
+      micStart: "Avvia registrazione", micStop: "Ferma registrazione", fill: "Invia", debug: "Mostra risposta IA (diagnostica)",
       noKey: "Inserire e salvare prima una chiave API OpenAI.", noText: "Inserire o dettare prima un testo.",
       working: "Richiesta IA in corso…", noSpeech: "Il riconoscimento vocale non è supportato da questo browser (es. Firefox) – il testo può essere digitato.",
-      done: "Fatto – verificare tutti i valori ripresi prima di procedere.", err: "Errore: ",
+      done: "Fatto – verificare tutti i valori ripresi prima di procedere.", err: "Errore: ", updated: "Ripreso – vedi la domanda sopra.",
+      dialogDone: "Grazie, basta così per questi dati. Può completare in qualsiasi momento (es. un altro scavo o pozzetto).", reset: "Ricomincia",
       sharedOn: "Nessuna chiave necessaria: senza inserimento viene usato l'accesso condiviso di questo progetto." },
     en: { title: "🎤 Voice input (AI-assisted)", key: "OpenAI API key", keyHint: "Stored only locally in this browser (localStorage) and sent directly to OpenAI – never to third parties.",
       save: "Save", saved: "Saved.", text: "Describe the project (speak or type)",
-      micStart: "Start recording", micStop: "Stop recording", fill: "Auto-fill fields", debug: "Show AI response (diagnostics)",
+      micStart: "Start recording", micStop: "Stop recording", fill: "Send", debug: "Show AI response (diagnostics)",
       noKey: "Please enter and save an OpenAI API key first.", noText: "Please enter or dictate some text first.",
       working: "Contacting AI…", noSpeech: "Speech recognition is not supported by this browser (e.g. Firefox) – text can still be typed.",
-      done: "Done – please check all applied values before proceeding.", err: "Error: ",
+      done: "Done – please check all applied values before proceeding.", err: "Error: ", updated: "Applied – see the question above.",
+      dialogDone: "Thanks, that's enough for this. You can add more at any time (e.g. another trench or shaft).", reset: "Restart",
       sharedOn: "No key needed: without input, this project's shared access is used." }
   };
   var SPEECH_LANG = { de: "de-CH", fr: "fr-CH", it: "it-CH", en: "en-US" };
@@ -3171,6 +3177,7 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     $("#l_voiceSharedHint").textContent = sharedAvailable ? tt("sharedOn") : "";
     $("#l_voiceMicStart").textContent = recognizing ? tt("micStop") : tt("micStart");
     $("#voiceFill").textContent = tt("fill");
+    $("#voiceReset").textContent = tt("reset");
     $("#l_voiceDebug").textContent = tt("debug");
   }
 
@@ -3229,16 +3236,27 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     var F = window.__KV.F;
     var gLines = fieldLines(F.graben), sLines = fieldLines(F.schacht);
     return [
-      "Du bist ein Extraktions-Assistent für ein Schweizer Tiefbau-Kostenvoranschlags-Tool (NPK/LV-Logik).",
-      "Der Nutzer beschreibt ein Bauprojekt in Fliesstext (Deutsch, Französisch, Italienisch oder Englisch), gesprochen oder getippt.",
-      "Extrahiere NUR Werte, die im Text klar genannt oder eindeutig ableitbar sind, als JSON-Objekt. Erfinde keine Werte.",
-      "Nutze ausschliesslich die unten aufgeführten Feld-Codes; bei Auswahlfeldern (opts) ausschliesslich die aufgeführten Codes, nicht übersetzen.",
-      "Zahlen: Dezimalpunkt, keine Tausendertrennzeichen, als String, z.B. \"80\" oder \"1.10\". Boolesche Felder: true/false.",
-      "Mehrere Gräben oder Schächte im Text ergeben mehrere Einträge in \"elems\". Antworte NUR mit dem JSON-Objekt, ohne Fliesstext, ohne Markdown-Codeblock.",
+      "Du bist ein Erfassungs-Dialog-Assistent für ein Schweizer Tiefbau-Kostenvoranschlags-Tool (NPK/LV-Logik).",
+      "Der Nutzer beschreibt ein Bauprojekt schrittweise in Fliesstext (Deutsch, Französisch, Italienisch oder Englisch), gesprochen oder getippt.",
+      "Du führst dazu einen kurzen, zielgerichteten Dialog – wie ein erfahrener Bauleiter, der ein Aufmass-Gespräch führt.",
       "",
-      "JSON-Form:",
-      "{ \"kopf.projekt\": string, \"kopf.ort\": string, \"sond.m3\": string, \"be.pct\": string, ... (nur bekannte, unten gelistete Top-Level-Codes),",
-      "  \"elems\": [ { \"type\": \"graben\"|\"schacht\", <Feld-Code>: <Wert>, ... } ] }",
+      "Bei JEDER Nutzer-Eingabe gehst du so vor:",
+      "1. Extrahiere alle neuen Werte, die klar genannt oder eindeutig ableitbar sind, in \"update\" (gleiche Struktur wie bisher). Erfinde keine Werte.",
+      "2. Prüfe, ob eine für die Kostenberechnung wesentliche Angabe noch fehlt oder unklar ist (z.B. bei einem Graben: Länge/Tiefe/Rohrsystem/Belagsart; bei einem Schacht: Einbauort/Schachttyp). Werte, die sinnvoll aus Normen/Standardwerten ableitbar sind, erfragst du NICHT.",
+      "3. Falls etwas Wesentliches fehlt: stelle GENAU EINE konkrete, kostenrelevante Rückfrage (kurz, konkret, in der Sprache des Nutzers) in \"question\". Niemals mehrere Fragen gleichzeitig.",
+      "4. Falls alles Wesentliche für die bisher genannten Elemente vorhanden ist: \"question\": null und \"done\": true (der Nutzer kann die Beschreibung trotzdem jederzeit fortsetzen, z.B. um ein weiteres Element hinzuzufügen).",
+      "",
+      "Nutze ausschliesslich die unten aufgeführten Feld-Codes für \"update\"; bei Auswahlfeldern (opts) ausschliesslich die aufgeführten Codes, nicht übersetzen.",
+      "Zahlen: Dezimalpunkt, keine Tausendertrennzeichen, als String, z.B. \"80\" oder \"1.10\". Boolesche Felder: true/false.",
+      "Jedes Element in \"elems\" braucht ein \"idx\" (Ganzzahl ab 0): Das erste im Dialog besprochene Element (gleich welchen Typs) erhält idx 0, das zweite idx 1, usw.",
+      "WICHTIG: Wenn eine neue Nutzer-Eingabe weitere Angaben zu einem BEREITS besprochenen Element liefert (z.B. die Antwort auf deine Rückfrage zu Graben 1), verwende für dieses Element wieder GENAU denselben idx-Wert wie zuvor – erstelle KEIN neues Element. Nur ein wirklich neuer, zusätzlicher Graben/Schacht bekommt einen neuen, bisher unbenutzten idx-Wert.",
+      "Antworte NUR mit dem JSON-Objekt, ohne Fliesstext, ohne Markdown-Codeblock.",
+      "",
+      "JSON-Form (immer alle drei Schlüssel):",
+      "{ \"update\": { \"kopf.projekt\": string, \"be.pct\": string, ... (nur bekannte Top-Level-Codes, nur neu erkannte Werte),",
+      "    \"elems\": [ { \"type\": \"graben\"|\"schacht\", \"idx\": 0, <Feld-Code>: <Wert>, ... } ] },",
+      "  \"question\": string|null,",
+      "  \"done\": boolean }",
       "",
       "Erlaubte Top-Level-Codes (Projektkopf/Vorarbeiten/Baustelleneinrichtung): " + KOPF_ALLOWED.join(", "),
       "",
@@ -3250,7 +3268,10 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     ].join("\n");
   }
 
-  /* ---------- Anwenden der extrahierten Daten ---------- */
+  /* ---------- Anwenden der extrahierten Daten (über mehrere Dialogrunden hinweg) ---------- */
+  var voiceElemMap = {}; // idx (laut LLM) -> real element object in S.elems, bleibt über die ganze Sitzung bestehen
+  function resetVoiceElemMap() { voiceElemMap = {}; }
+
   function applyExtraction(obj) {
     var K = window.__KV, S = K.S;
     var kopfKeys = {}; KOPF_ALLOWED.forEach(function (k) { kopfKeys[k] = 1; });
@@ -3259,20 +3280,25 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       if (kopfKeys[k] && obj[k] !== "" && obj[k] != null) { try { K.setv(S, k, obj[k]); } catch (e) {} }
     });
     var allow = { graben: {}, schacht: {} };
-    fieldLines(K.F.graben); // no-op, ensures dedup cache warm (ids identical to below)
     K.F.graben.forEach(function (f) { if (f.id && !SKIP_T[f.t]) allow.graben[f.id] = 1; });
     K.F.schacht.forEach(function (f) { if (f.id && !SKIP_T[f.t]) allow.schacht[f.id] = 1; });
     var n = 0;
     (Array.isArray(obj.elems) ? obj.elems : []).forEach(function (el) {
       if (!el || (el.type !== "graben" && el.type !== "schacht")) return;
-      var cnt = S.elems.filter(function (e) { return e.type === el.type; }).length + 1;
-      var base = el.type === "graben" ? K.newGraben(cnt) : K.newSchacht(cnt);
+      var idxKey = el.idx != null ? el.type + ":" + el.idx : null;
+      var target = idxKey && voiceElemMap[idxKey] ? voiceElemMap[idxKey] : null;
+      if (!target) {
+        var cnt = S.elems.filter(function (e) { return e.type === el.type; }).length + 1;
+        target = el.type === "graben" ? K.newGraben(cnt) : K.newSchacht(cnt);
+        S.elems.push(target);
+        if (idxKey) voiceElemMap[idxKey] = target;
+      }
       Object.keys(el).forEach(function (k) {
-        if (k === "type" || k === "__proto__" || !allow[el.type][k]) return;
+        if (k === "type" || k === "idx" || k === "__proto__" || !allow[el.type][k]) return;
         if (el[k] === "" || el[k] == null) return;
-        try { K.setv(base, k, el[k]); } catch (e) {}
+        try { K.setv(target, k, el[k]); } catch (e) {}
       });
-      S.elems.push(base); n++;
+      n++;
     });
     K.applyKopf(); K.renderForm(); K.renderVor(); K.renderBe(); K.renderResult();
     return n;
@@ -3283,8 +3309,13 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
   // Hält den OpenAI-Key serverseitig geheim; siehe worker.js im Repo.
   var SHARED_ENDPOINT = "SHARED_ENDPOINT_PLACEHOLDER";
 
+  var voiceHistory = []; // {role:"user"|"assistant", content:string} – Dialogverlauf dieser Sitzung
+  function resetVoiceHistory() { voiceHistory = []; }
+
   function callLLM(key, model, text) {
-    var messages = [{ role: "system", content: buildSystemPrompt() }, { role: "user", content: text }];
+    var messages = [{ role: "system", content: buildSystemPrompt() }]
+      .concat(voiceHistory.slice(-16))
+      .concat([{ role: "user", content: text }]);
     var useShared = !key && SHARED_ENDPOINT && SHARED_ENDPOINT.indexOf("http") === 0;
     var url = useShared ? SHARED_ENDPOINT : "https://api.openai.com/v1/chat/completions";
     var headers = { "Content-Type": "application/json" };
@@ -3352,20 +3383,43 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       $("#voiceStatus").textContent = tt("saved");
     };
     $("#voiceMic").onclick = toggleMic;
+
+    function addBubble(role, text) {
+      var box = $("#voiceChat"), b = document.createElement("div");
+      var isUser = role === "user";
+      b.style.cssText = "max-width:85%;padding:7px 11px;border-radius:9px;font-size:13px;line-height:1.4;white-space:pre-wrap;" +
+        (isUser ? "align-self:flex-end;background:var(--navy);color:#fff" : "align-self:flex-start;background:var(--panel-2);color:var(--ink)");
+      b.textContent = text;
+      box.appendChild(b); box.scrollTop = box.scrollHeight;
+    }
+
     $("#voiceFill").onclick = function () {
       var key = $("#voiceKey").value.trim(), model = $("#voiceModel").value.trim() || "gpt-4o-mini", text = $("#voiceText").value.trim();
       var sharedAvailable = SHARED_ENDPOINT && SHARED_ENDPOINT.indexOf("http") === 0;
       if (!key && !sharedAvailable) { $("#voiceStatus").textContent = tt("noKey"); return; }
       if (!text) { $("#voiceStatus").textContent = tt("noText"); return; }
+      addBubble("user", text);
+      $("#voiceText").value = ""; $("#voiceText").dataset.base = "";
       $("#voiceStatus").textContent = tt("working"); $("#voiceFill").disabled = true;
       callLLM(key, model, text).then(function (json) {
         $("#voiceDebugOut").textContent = JSON.stringify(json, null, 1);
-        var n = applyExtraction(json);
-        $("#voiceStatus").textContent = tt("done") + " (" + n + ")";
+        var upd = json && json.update ? json.update : (json || {});
+        var n = applyExtraction(upd);
+        voiceHistory.push({ role: "user", content: text });
+        var q = json && json.question;
+        var replyForHistory = q ? q : tt("dialogDone");
+        voiceHistory.push({ role: "assistant", content: replyForHistory });
+        if (q) { addBubble("assistant", q); $("#voiceStatus").textContent = tt("updated") + " (" + n + ")"; }
+        else { addBubble("assistant", tt("dialogDone")); $("#voiceStatus").textContent = tt("done") + " (" + n + ")"; }
       }).catch(function (e) {
         $("#voiceDebugOut").textContent = String(e && e.message || e);
         $("#voiceStatus").textContent = tt("err") + (e && e.message || e);
       }).then(function () { $("#voiceFill").disabled = false; });
+    };
+    $("#voiceReset").onclick = function () {
+      resetVoiceHistory(); resetVoiceElemMap();
+      $("#voiceChat").innerHTML = ""; $("#voiceText").value = ""; $("#voiceText").dataset.base = "";
+      $("#voiceDebugOut").textContent = ""; $("#voiceStatus").textContent = "";
     };
     document.querySelectorAll(".langs button").forEach(function (b) { b.addEventListener("click", function () { setTimeout(applyTexts, 0); }); });
     setupRecognition();
