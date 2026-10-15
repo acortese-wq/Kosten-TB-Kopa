@@ -652,6 +652,34 @@ body.summary-print .summary-only { display: block; }
         <ol id="helpSteps"></ol>
         <p id="helpNote"></p>
       </details>
+      <details class="help no-print" id="voiceBox" open>
+        <summary id="t-voiceTitle">🎤 Spracheingabe (KI-gestützt)</summary>
+        <div style="padding:4px 12px 14px">
+          <div class="field">
+            <label id="l_voiceKey">OpenAI API-Key</label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <input type="password" id="voiceKey" placeholder="sk-..." autocomplete="off" style="flex:1;min-width:180px">
+              <input type="text" id="voiceModel" value="gpt-4o-mini" autocomplete="off" style="width:140px" title="Modellname">
+              <button type="button" class="btn ghost small" id="voiceKeySave">Speichern</button>
+            </div>
+            <p id="l_voiceKeyHint" style="margin:5px 0 0;font-size:11.5px;color:var(--ink-soft)"></p>
+          </div>
+          <div class="field">
+            <label id="l_voiceText">Projekt beschreiben (sprechen oder tippen)</label>
+            <textarea id="voiceText" rows="4" placeholder="z.B. Leitungsgraben 80 m lang, Breite nach VSE, Tiefe 1.10 m, Rohrsystem K55 1x PE55, Belag Asphalt Typ N..."></textarea>
+          </div>
+          <div class="btns" style="margin-top:0;align-items:center">
+            <button type="button" class="btn ghost" id="voiceMic">🎤 <span id="l_voiceMicStart">Aufnahme starten</span></button>
+            <button type="button" class="btn" id="voiceFill">Felder automatisch ausfüllen</button>
+            <span id="voiceStatus" style="font-size:12.5px;color:var(--ink-soft)"></span>
+          </div>
+          <details style="margin-top:10px" id="voiceDebugBox">
+            <summary id="l_voiceDebug" style="cursor:pointer;font-size:12px;color:var(--ink-soft)">KI-Antwort anzeigen (Diagnose)</summary>
+            <pre id="voiceDebugOut" style="white-space:pre-wrap;font-size:11.5px;background:var(--panel-2);padding:8px;border-radius:4px;max-height:220px;overflow:auto"></pre>
+          </details>
+        </div>
+      </details>
+
       <h2><span class="num">1</span><span id="h-elems"></span></h2>
       <div class="addrow"><button type="button" class="btn" id="addG"></button><button type="button" class="btn" id="addS"></button></div>
       <div id="elems"></div>
@@ -3081,11 +3109,257 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     $("#bLoad").onclick = function () { $("#fileIn").click(); };
     $("#fileIn").addEventListener("change", function () { if (this.files[0]) load(this.files[0]); this.value = ""; });
     applyKopf(); applyLang();
-    window.__KV = { xlsxBytes: xlsxBytes, S: S, renderResult: renderResult, newGraben: newGraben, newSchacht: newSchacht, renderForm: renderForm };
+    window.__KV = { xlsxBytes: xlsxBytes, S: S, renderResult: renderResult, newGraben: newGraben, newSchacht: newSchacht, renderForm: renderForm,
+      renderVor: renderVor, renderBe: renderBe, applyKopf: applyKopf, F: F, setv: setv };
   }
   document.addEventListener("DOMContentLoaded", init);
 })();
 
+</script>
+<script>
+/* =====================================================================
+   Spracheingabe + LLM-Erfassung (additiv, greift ausschliesslich über
+   window.__KV auf den bestehenden Zustand/Felddefinitionen zu)
+   ===================================================================== */
+(function () {
+  "use strict";
+  var $ = function (s) { return document.querySelector(s); };
+
+  var TXT = {
+    de: { title: "🎤 Spracheingabe (KI-gestützt)", key: "OpenAI API-Key", keyHint: "Wird nur lokal in diesem Browser gespeichert (localStorage) und direkt an OpenAI gesendet – nie an Dritte.",
+      save: "Speichern", saved: "Gespeichert.", text: "Projekt beschreiben (sprechen oder tippen)",
+      micStart: "Aufnahme starten", micStop: "Aufnahme stoppen", fill: "Felder automatisch ausfüllen", debug: "KI-Antwort anzeigen (Diagnose)",
+      noKey: "Bitte zuerst einen OpenAI API-Key eintragen und speichern.", noText: "Bitte zuerst einen Text eingeben oder diktieren.",
+      working: "Anfrage an KI läuft…", noSpeech: "Spracherkennung wird von diesem Browser nicht unterstützt (z.B. Firefox) – Text kann trotzdem eingegeben werden.",
+      done: "Fertig – bitte alle übernommenen Werte vor der Weiterverarbeitung prüfen.", err: "Fehler: " },
+    fr: { title: "🎤 Saisie vocale (IA)", key: "Clé API OpenAI", keyHint: "Stockée uniquement dans ce navigateur (localStorage) et envoyée directement à OpenAI – jamais à des tiers.",
+      save: "Enregistrer", saved: "Enregistré.", text: "Décrire le projet (parler ou taper)",
+      micStart: "Démarrer l'enregistrement", micStop: "Arrêter l'enregistrement", fill: "Remplir automatiquement les champs", debug: "Afficher la réponse de l'IA (diagnostic)",
+      noKey: "Veuillez d'abord saisir et enregistrer une clé API OpenAI.", noText: "Veuillez d'abord saisir ou dicter un texte.",
+      working: "Requête IA en cours…", noSpeech: "La reconnaissance vocale n'est pas prise en charge par ce navigateur (p.ex. Firefox) – le texte peut être saisi manuellement.",
+      done: "Terminé – veuillez vérifier toutes les valeurs reprises avant de poursuivre.", err: "Erreur : " },
+    it: { title: "🎤 Input vocale (IA)", key: "Chiave API OpenAI", keyHint: "Salvata solo in locale in questo browser (localStorage) e inviata direttamente a OpenAI – mai a terzi.",
+      save: "Salva", saved: "Salvato.", text: "Descrivere il progetto (parlando o scrivendo)",
+      micStart: "Avvia registrazione", micStop: "Ferma registrazione", fill: "Compila automaticamente i campi", debug: "Mostra risposta IA (diagnostica)",
+      noKey: "Inserire e salvare prima una chiave API OpenAI.", noText: "Inserire o dettare prima un testo.",
+      working: "Richiesta IA in corso…", noSpeech: "Il riconoscimento vocale non è supportato da questo browser (es. Firefox) – il testo può essere digitato.",
+      done: "Fatto – verificare tutti i valori ripresi prima di procedere.", err: "Errore: " },
+    en: { title: "🎤 Voice input (AI-assisted)", key: "OpenAI API key", keyHint: "Stored only locally in this browser (localStorage) and sent directly to OpenAI – never to third parties.",
+      save: "Save", saved: "Saved.", text: "Describe the project (speak or type)",
+      micStart: "Start recording", micStop: "Stop recording", fill: "Auto-fill fields", debug: "Show AI response (diagnostics)",
+      noKey: "Please enter and save an OpenAI API key first.", noText: "Please enter or dictate some text first.",
+      working: "Contacting AI…", noSpeech: "Speech recognition is not supported by this browser (e.g. Firefox) – text can still be typed.",
+      done: "Done – please check all applied values before proceeding.", err: "Error: " }
+  };
+  var SPEECH_LANG = { de: "de-CH", fr: "fr-CH", it: "it-CH", en: "en-US" };
+
+  function curLang() { return (window.__KV && window.__KV.S && window.__KV.S.lang) || "de"; }
+  function tt(k) { var d = TXT[curLang()] || TXT.de; return d[k] != null ? d[k] : k; }
+
+  function applyTexts() {
+    $("#t-voiceTitle").textContent = tt("title");
+    $("#l_voiceKey").textContent = tt("key");
+    $("#l_voiceKeyHint").textContent = tt("keyHint");
+    $("#voiceKeySave").textContent = tt("save");
+    $("#l_voiceText").textContent = tt("text");
+    $("#l_voiceMicStart").textContent = recognizing ? tt("micStop") : tt("micStart");
+    $("#voiceFill").textContent = tt("fill");
+    $("#l_voiceDebug").textContent = tt("debug");
+  }
+
+  /* ---------- Feld-Beschreibungen für den LLM-Prompt ---------- */
+  var DESC = {
+    name: "Bezeichnung (Freitext)", L: "Länge Graben in m", T: "Tiefe Graben in m",
+    bmode: "Grabenbreite-Modus", aussen: "Aussenmass Rohr/Rohrblock in m (nur bei bmode begangen/nicht_begangen)", bman: "Grabenbreite manuell in m (nur bei bmode manuell)",
+    aushubArt: "Aushubart", saugH: "Saughöhe in m (nur bei aushubArt saug)", hand: "Erschwernis Handaushub durch Platzverhältnisse",
+    gesp: "Wände gespriesst (true/false)", direkt: "Direktverlad/-abtransport möglich (true/false)",
+    "mods.ersch": "Erschwernisse aktiv (true/false)", "ersch.klasse": "Erschwernisklasse", "ersch.verf": "Erschwernis-Verfahren",
+    "ersch.hind": "Hindernis-Art", "ersch.hindVol": "Hindernis-Volumen in m3",
+    rohrSystem: "Rohrsystem", dn: "Rohrdurchmesser (mm, Standard-System)", len: "Rohrlänge pro Stange in m", n: "Anzahl Rohre/Elemente",
+    muffenMode: "Muffen-Modus", muffenN: "Anzahl Muffen manuell", b90: "Anzahl Bogen 90°", b45: "Anzahl Bogen 45°", schneiden: "Anzahl Rohrschnitte",
+    dn2: "Rohrdurchmesser Längsrohr", n2: "Anzahl Rohre Längsrohr", "block.breite": "Rohrblock Breite in m", "block.hoehe": "Rohrblock Höhe in m",
+    warnband: "Warnband verlegen (true/false)", kalib: "Kalibrierung (true/false)", einzug: "Einzugshilfe",
+    umhType: "Umhüllung Leitungszone Typ", umhMat: "Umhüllungsmaterial", umhArea: "Umhüllungsquerschnitt in m2",
+    verf: "Verfüllmaterial Graben/Grube", einfHand: "Einfüllen von Hand (true/false)",
+    "belag.mode": "Belagsart", Lb: "Länge Belagsaufbruch in m (falls abweichend von L)",
+    "belag.d": "Belagsdicke gesamt in mm", "belag.pak": "Rückbau Belag Fläche (le250/gt250 m2)", "belag.einbau": "Einbau durch Dritte oder gemäss Typ N",
+    "belag.typ": "Normschema Typ (N=Normal, L=Leicht)", "belag.trag": "Tragschicht-Typ", "belag.dTrag": "Tragschichtdicke in mm",
+    "belag.deck": "Deckschicht-Sorte", "belag.deckArt": "Einbauart Deckschicht", "belag.dDeck": "Deckschichtdicke in mm",
+    "belag.haft": "Haftschicht (true/false)", "belag.naehte": "Fugen/Nähte (true/false)", "belag.fund": "Fundationsschicht in mm (0/150/200/300)",
+    "belag.humus.art": "Humus-Art", "belag.humus.dOber": "Humusdicke in cm", "belag.humus.hand": "Humusarbeiten von Hand (true/false)", "belag.humus.ansaeen": "Ansäen (true/false)",
+    "belag.pflaster.abbruchAlt": "Rückbau altes Pflaster (true/false)", "belag.pflaster.abbruchArt": "Art Altpflaster-Rückbau",
+    "belag.pflaster.material": "Pflastermaterial", "belag.pflaster.dicke": "Pflasterdicke in mm", "belag.pflaster.fund": "Pflaster-Fundationsschicht in mm",
+    "belag.pflaster.randNeu": "Neue Randeinfassung (true/false)", "belag.pflaster.randMat": "Material Randstein", "belag.pflaster.randTyp": "Typ Randstein",
+    "belag.pflaster.randLaenge": "Länge Randeinfassung in m", "belag.pflaster.randAbbruch": "Rückbau alte Randeinfassung (true/false)",
+    "mods.fremd": "Querung Fremdleitungen aktiv (true/false)", "kreuz.on": "Querung Werkleitung aktiv (true/false)", "kreuz.richtung": "Richtung Querung",
+    "kreuz.n": "Anzahl Querungen", "kreuz.len": "Länge pro Querung in m",
+    "zores.on": "Zoresrohr/-kanal vorhanden (true/false)", "zores.zustand": "Zustand Zores", "zores.len": "Länge Zores in m",
+    "mods.boesch": "Böschung aktiv (true/false)", "boeschung.flaeche": "Böschungsfläche in m2", "boeschung.geneigt": "Böschung geneigt (true/false)",
+    modus: "Modus (neu=Schacht neu bauen, deckel=nur Deckel ersetzen)", deckelRichtung: "Höhenanpassung Deckel Richtung", deckelFormat: "Format bei reinem Deckelersatz", deckelN: "Anzahl Deckel (Modus deckel)",
+    einbauort: "Einbauort Schacht (HLS/HVS/VS50/VS49/SS/ESS/GEH/WIES)", typ: "Schachttyp (KS80U/KS80H/KES100/KES150/KES175/ES300/PLS1/PLS2/PLS3)",
+    arbeit: "Arbeitsraum-Zuschlag in m", deckelFormat2: "Rahmenformat (90/180)", deckelSockel: "Sockel vorhanden (ohne/mit)",
+    anschl: "Anzahl Anschlüsse Rohre an Schacht", anDN: "Durchmesser Anschlussrohr (80/150)", beton: "Rückbau Altbeton in m3", platten: "Rückbau Platten in m2"
+  };
+  var DYN_OPTS = { "belag.deck": ["AC4L", "AC8L", "AC8", "AC11"], "belag.pflaster.dicke": ["40", "50", "60", "80"] };
+  var SKIP_T = { cover: 1, blockList: 1, abzwList: 1 };
+
+  function fieldLines(arr) {
+    var seen = {}, out = [];
+    arr.forEach(function (f) {
+      if (!f.id || SKIP_T[f.t] || seen[f.id]) return;
+      seen[f.id] = 1;
+      var opts = Array.isArray(f.opts) ? f.opts : (DYN_OPTS[f.id] || null);
+      var line = f.id + " (" + f.t + (opts ? ", opts: " + opts.join("|") : "") + ")";
+      if (DESC[f.id]) line += " – " + DESC[f.id];
+      out.push(line);
+    });
+    return out;
+  }
+
+  var KOPF_ALLOWED = ["kopf.projekt", "kopf.ort", "kopf.bearb", "kopf.devisNr", "kopf.lieferant", "kopf.vertrag", "kopf.termin", "sond.m3", "sond.einfHand", "wasser.h", "wasser.sumpf", "be.pct"];
+
+  function buildSystemPrompt() {
+    var F = window.__KV.F;
+    var gLines = fieldLines(F.graben), sLines = fieldLines(F.schacht);
+    return [
+      "Du bist ein Extraktions-Assistent für ein Schweizer Tiefbau-Kostenvoranschlags-Tool (NPK/LV-Logik).",
+      "Der Nutzer beschreibt ein Bauprojekt in Fliesstext (Deutsch, Französisch, Italienisch oder Englisch), gesprochen oder getippt.",
+      "Extrahiere NUR Werte, die im Text klar genannt oder eindeutig ableitbar sind, als JSON-Objekt. Erfinde keine Werte.",
+      "Nutze ausschliesslich die unten aufgeführten Feld-Codes; bei Auswahlfeldern (opts) ausschliesslich die aufgeführten Codes, nicht übersetzen.",
+      "Zahlen: Dezimalpunkt, keine Tausendertrennzeichen, als String, z.B. \"80\" oder \"1.10\". Boolesche Felder: true/false.",
+      "Mehrere Gräben oder Schächte im Text ergeben mehrere Einträge in \"elems\". Antworte NUR mit dem JSON-Objekt, ohne Fliesstext, ohne Markdown-Codeblock.",
+      "",
+      "JSON-Form:",
+      "{ \"kopf.projekt\": string, \"kopf.ort\": string, \"sond.m3\": string, \"be.pct\": string, ... (nur bekannte, unten gelistete Top-Level-Codes),",
+      "  \"elems\": [ { \"type\": \"graben\"|\"schacht\", <Feld-Code>: <Wert>, ... } ] }",
+      "",
+      "Erlaubte Top-Level-Codes (Projektkopf/Vorarbeiten/Baustelleneinrichtung): " + KOPF_ALLOWED.join(", "),
+      "",
+      "Erlaubte Feld-Codes für elems vom Typ \"graben\":",
+      gLines.join("\n"),
+      "",
+      "Erlaubte Feld-Codes für elems vom Typ \"schacht\":",
+      sLines.join("\n")
+    ].join("\n");
+  }
+
+  /* ---------- Anwenden der extrahierten Daten ---------- */
+  function applyExtraction(obj) {
+    var K = window.__KV, S = K.S;
+    var kopfKeys = {}; KOPF_ALLOWED.forEach(function (k) { kopfKeys[k] = 1; });
+    Object.keys(obj).forEach(function (k) {
+      if (k === "elems" || k === "__proto__") return;
+      if (kopfKeys[k] && obj[k] !== "" && obj[k] != null) { try { K.setv(S, k, obj[k]); } catch (e) {} }
+    });
+    var allow = { graben: {}, schacht: {} };
+    fieldLines(K.F.graben); // no-op, ensures dedup cache warm (ids identical to below)
+    K.F.graben.forEach(function (f) { if (f.id && !SKIP_T[f.t]) allow.graben[f.id] = 1; });
+    K.F.schacht.forEach(function (f) { if (f.id && !SKIP_T[f.t]) allow.schacht[f.id] = 1; });
+    var n = 0;
+    (Array.isArray(obj.elems) ? obj.elems : []).forEach(function (el) {
+      if (!el || (el.type !== "graben" && el.type !== "schacht")) return;
+      var cnt = S.elems.filter(function (e) { return e.type === el.type; }).length + 1;
+      var base = el.type === "graben" ? K.newGraben(cnt) : K.newSchacht(cnt);
+      Object.keys(el).forEach(function (k) {
+        if (k === "type" || k === "__proto__" || !allow[el.type][k]) return;
+        if (el[k] === "" || el[k] == null) return;
+        try { K.setv(base, k, el[k]); } catch (e) {}
+      });
+      S.elems.push(base); n++;
+    });
+    K.applyKopf(); K.renderForm(); K.renderVor(); K.renderBe(); K.renderResult();
+    return n;
+  }
+
+  /* ---------- OpenAI-Aufruf ---------- */
+  function callLLM(key, model, text) {
+    return fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: "Bearer " + key },
+      body: JSON.stringify({
+        model: model, temperature: 0, response_format: { type: "json_object" },
+        messages: [{ role: "system", content: buildSystemPrompt() }, { role: "user", content: text }]
+      })
+    }).then(function (r) {
+      if (!r.ok) return r.text().then(function (t) { throw new Error("HTTP " + r.status + " – " + t.slice(0, 300)); });
+      return r.json();
+    }).then(function (data) {
+      var c = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+      if (!c) throw new Error("Keine Antwort erhalten.");
+      return JSON.parse(c);
+    });
+  }
+
+  /* ---------- Spracherkennung ---------- */
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var rec = null, recognizing = false;
+  function setupRecognition() {
+    if (!SR) { $("#voiceMic").disabled = true; $("#voiceStatus").textContent = tt("noSpeech"); return; }
+    rec = new SR(); rec.continuous = true; rec.interimResults = true;
+    rec.onresult = function (ev) {
+      var finalTxt = "", interim = "";
+      for (var i = 0; i < ev.results.length; i++) {
+        if (ev.results[i].isFinal) finalTxt += ev.results[i][0].transcript + " ";
+        else interim += ev.results[i][0].transcript;
+      }
+      var ta = $("#voiceText");
+      ta.value = (ta.dataset.base || "") + finalTxt;
+      ta.dataset.base = ta.value;
+      $("#voiceStatus").textContent = interim;
+    };
+    rec.onerror = function (ev) { $("#voiceStatus").textContent = tt("err") + ev.error; recognizing = false; applyTexts(); };
+    rec.onend = function () { if (recognizing) { try { rec.start(); } catch (e) {} } };
+  }
+
+  function toggleMic() {
+    if (!rec) return;
+    if (!recognizing) {
+      $("#voiceText").dataset.base = $("#voiceText").value ? $("#voiceText").value + " " : "";
+      rec.lang = SPEECH_LANG[curLang()] || "de-CH";
+      try { rec.start(); recognizing = true; } catch (e) {}
+    } else {
+      recognizing = false; try { rec.stop(); } catch (e) {}
+      $("#voiceStatus").textContent = "";
+    }
+    applyTexts();
+  }
+
+  /* ---------- Init ---------- */
+  function initVoice() {
+    var savedKey = ""; try { savedKey = localStorage.getItem("kv_openai_key") || ""; } catch (e) {}
+    var savedModel = ""; try { savedModel = localStorage.getItem("kv_openai_model") || ""; } catch (e) {}
+    if (savedKey) $("#voiceKey").value = savedKey;
+    if (savedModel) $("#voiceModel").value = savedModel;
+
+    $("#voiceKeySave").onclick = function () {
+      try { localStorage.setItem("kv_openai_key", $("#voiceKey").value.trim()); localStorage.setItem("kv_openai_model", $("#voiceModel").value.trim() || "gpt-4o-mini"); } catch (e) {}
+      $("#voiceStatus").textContent = tt("saved");
+    };
+    $("#voiceMic").onclick = toggleMic;
+    $("#voiceFill").onclick = function () {
+      var key = $("#voiceKey").value.trim(), model = $("#voiceModel").value.trim() || "gpt-4o-mini", text = $("#voiceText").value.trim();
+      if (!key) { $("#voiceStatus").textContent = tt("noKey"); return; }
+      if (!text) { $("#voiceStatus").textContent = tt("noText"); return; }
+      $("#voiceStatus").textContent = tt("working"); $("#voiceFill").disabled = true;
+      callLLM(key, model, text).then(function (json) {
+        $("#voiceDebugOut").textContent = JSON.stringify(json, null, 1);
+        var n = applyExtraction(json);
+        $("#voiceStatus").textContent = tt("done") + " (" + n + ")";
+      }).catch(function (e) {
+        $("#voiceDebugOut").textContent = String(e && e.message || e);
+        $("#voiceStatus").textContent = tt("err") + (e && e.message || e);
+      }).then(function () { $("#voiceFill").disabled = false; });
+    };
+    document.querySelectorAll(".langs button").forEach(function (b) { b.addEventListener("click", function () { setTimeout(applyTexts, 0); }); });
+    setupRecognition();
+    applyTexts();
+  }
+
+  document.addEventListener("DOMContentLoaded", function () {
+    // nach dem Haupt-init() ausführen, damit window.__KV bereits existiert
+    setTimeout(initVoice, 0);
+  });
+})();
 </script>
 </body>
 </html>
