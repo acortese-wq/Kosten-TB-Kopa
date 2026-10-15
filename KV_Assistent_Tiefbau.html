@@ -3351,19 +3351,32 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
   /* ---------- Spracherkennung ---------- */
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   var rec = null, recognizing = false;
+  var baseText = "", finalizedSoFar = "", finalizedCount = 0, autoSendTimer = null;
+
+  function scheduleAutoSend() {
+    clearTimeout(autoSendTimer);
+    autoSendTimer = setTimeout(function () {
+      if ($("#voiceText").value.trim() && !$("#voiceFill").disabled) {
+        $("#voiceFill").click();
+        baseText = ""; finalizedSoFar = ""; finalizedCount = 0;
+        if (recognizing && rec) { try { rec.stop(); } catch (e) {} } // onend startet automatisch neu, ev.results wird dadurch zurückgesetzt
+      }
+    }, 1200);
+  }
+
   function setupRecognition() {
     if (!SR) { $("#voiceMic").disabled = true; $("#voiceStatus").textContent = tt("noSpeech"); return; }
     rec = new SR(); rec.continuous = true; rec.interimResults = true;
     rec.onresult = function (ev) {
-      var finalTxt = "", interim = "";
-      for (var i = 0; i < ev.results.length; i++) {
-        if (ev.results[i].isFinal) finalTxt += ev.results[i][0].transcript + " ";
-        else interim += ev.results[i][0].transcript;
+      for (var i = finalizedCount; i < ev.results.length; i++) {
+        if (ev.results[i].isFinal) { finalizedSoFar += ev.results[i][0].transcript + " "; finalizedCount = i + 1; }
+        else break;
       }
-      var ta = $("#voiceText");
-      ta.value = (ta.dataset.base || "") + finalTxt;
-      ta.dataset.base = ta.value;
+      var interim = "";
+      if (ev.results.length > 0 && !ev.results[ev.results.length - 1].isFinal) interim = ev.results[ev.results.length - 1][0].transcript;
+      $("#voiceText").value = baseText + finalizedSoFar + interim;
       $("#voiceStatus").textContent = interim;
+      scheduleAutoSend();
     };
     rec.onerror = function (ev) { $("#voiceStatus").textContent = tt("err") + ev.error; recognizing = false; applyTexts(); };
     rec.onend = function () { if (recognizing) { try { rec.start(); } catch (e) {} } };
@@ -3372,11 +3385,11 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
   function toggleMic() {
     if (!rec) return;
     if (!recognizing) {
-      $("#voiceText").dataset.base = $("#voiceText").value ? $("#voiceText").value + " " : "";
+      baseText = $("#voiceText").value ? $("#voiceText").value + " " : ""; finalizedSoFar = ""; finalizedCount = 0;
       rec.lang = SPEECH_LANG[curLang()] || "de-CH";
       try { rec.start(); recognizing = true; } catch (e) {}
     } else {
-      recognizing = false; try { rec.stop(); } catch (e) {}
+      recognizing = false; clearTimeout(autoSendTimer); try { rec.stop(); } catch (e) {}
       $("#voiceStatus").textContent = "";
     }
     applyTexts();
@@ -3411,7 +3424,7 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       if (!key && !sharedAvailable) { $("#voiceStatus").textContent = tt("noKey"); return; }
       if (!text) { $("#voiceStatus").textContent = tt("noText"); return; }
       addBubble("user", text);
-      $("#voiceText").value = ""; $("#voiceText").dataset.base = "";
+      $("#voiceText").value = ""; baseText = ""; finalizedSoFar = ""; finalizedCount = 0;
       $("#voiceStatus").textContent = tt("working"); $("#voiceFill").disabled = true;
       callLLM(key, model, text).then(function (json) {
         $("#voiceDebugOut").textContent = JSON.stringify(json, null, 1);
@@ -3432,7 +3445,8 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     };
     $("#voiceReset").onclick = function () {
       resetVoiceHistory(); resetVoiceElemMap();
-      $("#voiceText").value = ""; $("#voiceText").dataset.base = "";
+      clearTimeout(autoSendTimer); baseText = ""; finalizedSoFar = ""; finalizedCount = 0;
+      $("#voiceText").value = "";
       $("#voiceDebugOut").textContent = ""; $("#voiceStatus").textContent = "";
       greet();
     };
