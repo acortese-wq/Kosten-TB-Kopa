@@ -3136,7 +3136,9 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       working: "Anfrage an KI läuft…", noSpeech: "Spracherkennung wird von diesem Browser nicht unterstützt (z.B. Firefox) – Text kann trotzdem eingegeben werden.",
       done: "Fertig – bitte alle übernommenen Werte vor der Weiterverarbeitung prüfen.", err: "Fehler: ", updated: "Übernommen – siehe Rückfrage oben.",
       dialogDone: "Danke, das reicht für diese Angaben. Sie können jederzeit weitere Angaben ergänzen (z.B. einen weiteren Graben oder Schacht).", reset: "Neu starten",
-      sharedOn: "Kein eigener Key nötig: Ohne Eingabe wird der gemeinsame Zugang dieses Projekts verwendet." },
+      sharedOn: "Kein eigener Key nötig: Ohne Eingabe wird der gemeinsame Zugang dieses Projekts verwendet.",
+      greeting: "Guten Tag! Beschreiben Sie mir Ihr Bauprojekt – z.B. Länge und Tiefe eines Grabens, Rohrsystem, Belagsart, oder einen Schacht mit Einbauort und Typ. Ich fülle die Felder direkt mit und frage gezielt nach, falls etwas Wesentliches fehlt.",
+      abortedHint: "Die Anfrage wurde von Browser/Netzwerk abgebrochen (z.B. Firewall, Ad-Blocker oder Verbindungsabbruch) – bitte nochmals senden." },
     fr: { title: "🎤 Saisie vocale (IA)", key: "Clé API OpenAI", keyHint: "Stockée uniquement dans ce navigateur (localStorage) et envoyée directement à OpenAI – jamais à des tiers.",
       save: "Enregistrer", saved: "Enregistré.", text: "Message (parler ou taper)",
       micStart: "Démarrer l'enregistrement", micStop: "Arrêter l'enregistrement", fill: "Envoyer", debug: "Afficher la réponse de l'IA (diagnostic)",
@@ -3144,7 +3146,9 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       working: "Requête IA en cours…", noSpeech: "La reconnaissance vocale n'est pas prise en charge par ce navigateur (p.ex. Firefox) – le texte peut être saisi manuellement.",
       done: "Terminé – veuillez vérifier toutes les valeurs reprises avant de poursuivre.", err: "Erreur : ", updated: "Repris – voir la question ci-dessus.",
       dialogDone: "Merci, cela suffit pour ces informations. Vous pouvez compléter à tout moment (p. ex. une autre tranchée ou un autre regard).", reset: "Redémarrer",
-      sharedOn: "Aucune clé requise : sans saisie, l'accès partagé de ce projet est utilisé." },
+      sharedOn: "Aucune clé requise : sans saisie, l'accès partagé de ce projet est utilisé.",
+      greeting: "Bonjour ! Décrivez-moi votre projet de construction – p. ex. longueur et profondeur d'une tranchée, système de tuyaux, type de revêtement, ou un regard avec son emplacement et son type. Je remplis directement les champs et pose une question ciblée s'il manque quelque chose d'essentiel.",
+      abortedHint: "La requête a été interrompue par le navigateur/réseau (pare-feu, bloqueur de pub, coupure de connexion) – veuillez renvoyer." },
     it: { title: "🎤 Input vocale (IA)", key: "Chiave API OpenAI", keyHint: "Salvata solo in locale in questo browser (localStorage) e inviata direttamente a OpenAI – mai a terzi.",
       save: "Salva", saved: "Salvato.", text: "Messaggio (parlando o scrivendo)",
       micStart: "Avvia registrazione", micStop: "Ferma registrazione", fill: "Invia", debug: "Mostra risposta IA (diagnostica)",
@@ -3152,7 +3156,9 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       working: "Richiesta IA in corso…", noSpeech: "Il riconoscimento vocale non è supportato da questo browser (es. Firefox) – il testo può essere digitato.",
       done: "Fatto – verificare tutti i valori ripresi prima di procedere.", err: "Errore: ", updated: "Ripreso – vedi la domanda sopra.",
       dialogDone: "Grazie, basta così per questi dati. Può completare in qualsiasi momento (es. un altro scavo o pozzetto).", reset: "Ricomincia",
-      sharedOn: "Nessuna chiave necessaria: senza inserimento viene usato l'accesso condiviso di questo progetto." },
+      sharedOn: "Nessuna chiave necessaria: senza inserimento viene usato l'accesso condiviso di questo progetto.",
+      greeting: "Buongiorno! Descrivimi il tuo progetto di costruzione – p.es. lunghezza e profondità di uno scavo, sistema di tubi, tipo di pavimentazione, oppure un pozzetto con ubicazione e tipo. Compilo subito i campi e faccio una domanda mirata se manca qualcosa di essenziale.",
+      abortedHint: "La richiesta è stata interrotta dal browser/rete (firewall, ad-blocker, interruzione di connessione) – si prega di inviare di nuovo." },
     en: { title: "🎤 Voice input (AI-assisted)", key: "OpenAI API key", keyHint: "Stored only locally in this browser (localStorage) and sent directly to OpenAI – never to third parties.",
       save: "Save", saved: "Saved.", text: "Message (speak or type)",
       micStart: "Start recording", micStop: "Stop recording", fill: "Send", debug: "Show AI response (diagnostics)",
@@ -3160,7 +3166,9 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       working: "Contacting AI…", noSpeech: "Speech recognition is not supported by this browser (e.g. Firefox) – text can still be typed.",
       done: "Done – please check all applied values before proceeding.", err: "Error: ", updated: "Applied – see the question above.",
       dialogDone: "Thanks, that's enough for this. You can add more at any time (e.g. another trench or shaft).", reset: "Restart",
-      sharedOn: "No key needed: without input, this project's shared access is used." }
+      sharedOn: "No key needed: without input, this project's shared access is used.",
+      greeting: "Hello! Describe your construction project – e.g. the length and depth of a trench, pipe system, surfacing type, or a shaft with its location and type. I'll fill in the fields directly and ask one targeted question if something essential is missing.",
+      abortedHint: "The request was aborted by the browser/network (firewall, ad blocker, or dropped connection) – please send it again." }
   };
   var SPEECH_LANG = { de: "de-CH", fr: "fr-CH", it: "it-CH", en: "en-US" };
 
@@ -3393,6 +3401,7 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       b.textContent = text;
       box.appendChild(b); box.scrollTop = box.scrollHeight;
     }
+    function greet() { $("#voiceChat").innerHTML = ""; addBubble("assistant", tt("greeting")); }
 
     $("#voiceFill").onclick = function () {
       var key = $("#voiceKey").value.trim(), model = $("#voiceModel").value.trim() || "gpt-4o-mini", text = $("#voiceText").value.trim();
@@ -3413,14 +3422,17 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
         if (q) { addBubble("assistant", q); $("#voiceStatus").textContent = tt("updated") + " (" + n + ")"; }
         else { addBubble("assistant", tt("dialogDone")); $("#voiceStatus").textContent = tt("done") + " (" + n + ")"; }
       }).catch(function (e) {
-        $("#voiceDebugOut").textContent = String(e && e.message || e);
-        $("#voiceStatus").textContent = tt("err") + (e && e.message || e);
+        var msg = (e && e.message) || String(e);
+        $("#voiceDebugOut").textContent = msg;
+        var isAbort = e && (e.name === "AbortError" || /abort/i.test(msg));
+        $("#voiceStatus").textContent = isAbort ? tt("abortedHint") : tt("err") + msg;
       }).then(function () { $("#voiceFill").disabled = false; });
     };
     $("#voiceReset").onclick = function () {
       resetVoiceHistory(); resetVoiceElemMap();
-      $("#voiceChat").innerHTML = ""; $("#voiceText").value = ""; $("#voiceText").dataset.base = "";
+      $("#voiceText").value = ""; $("#voiceText").dataset.base = "";
       $("#voiceDebugOut").textContent = ""; $("#voiceStatus").textContent = "";
+      greet();
     };
     $("#voiceText").addEventListener("keydown", function (ev) {
       if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); $("#voiceFill").click(); }
@@ -3428,6 +3440,7 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     document.querySelectorAll(".langs button").forEach(function (b) { b.addEventListener("click", function () { setTimeout(applyTexts, 0); }); });
     setupRecognition();
     applyTexts();
+    greet();
   }
 
   document.addEventListener("DOMContentLoaded", function () {
