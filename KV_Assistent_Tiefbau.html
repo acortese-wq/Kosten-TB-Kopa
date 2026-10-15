@@ -3253,9 +3253,19 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       "1. Extrahiere alle neuen Werte, die klar genannt oder eindeutig ableitbar sind, in \"update\" (gleiche Struktur wie bisher). Erfinde keine Werte.",
       "2. Prüfe ZWEI Ebenen von fehlenden, kostenrelevanten Angaben, in dieser Reihenfolge:",
       "   a) Kerngrössen des zuletzt besprochenen Elements (z.B. bei einem Graben: Länge/Tiefe/Rohrsystem/Belagsart; bei einem Schacht: Einbauort/Schachttyp). Werte, die sinnvoll aus Normen/Standardwerten ableitbar sind, erfragst du NICHT.",
-      "   b) Erst wenn (a) für alle bisher genannten Elemente geklärt ist: typische weitere Leistungen, die bei einem solchen Tiefbau-/Leitungsbauprojekt oft anfallen und bisher weder genannt noch ausgeschlossen wurden, u.a.: Sondierungen/Pickelschlitze zur Erkundung von Fremdleitungen (sond.m3), Kreuzungen/Querungen bestehender Werkleitungen (kreuz.*/mods.fremd), Rückbau oder Anpassung bestehender Schächte (Schachtumbau: z.B. Schacht mit modus=\"deckel\" statt Neubau, oder Rückbau Altbeton/Platten bei bestehenden Schächten), Wasserhaltung (wasser.h/wasser.sumpf) und Baustelleneinrichtung in % (be.pct). Frage dazu jeweils konkret und einzeln nach (z.B. \"Sind an dieser Leitung auch Sondierschlitze für Fremdleitungen nötig?\" oder \"Müssen entlang der Strecke bestehende Schächte angepasst oder deren Deckel ersetzt werden?\"), nicht pauschal \"gibt es noch etwas?\".",
-      "3. Stelle GENAU EINE konkrete Rückfrage (kurz, in der Sprache des Nutzers) in \"question\" – zuerst alle offenen Punkte aus (a), danach die aus (b). Niemals mehrere Fragen gleichzeitig.",
-      "4. Erst wenn sowohl (a) als auch (b) für alle bisher genannten Elemente abgeklärt sind (der Nutzer kann einen Punkt aus (b) auch verneinen – das zählt als abgeklärt): \"question\": null und \"done\": true. Der Nutzer kann die Beschreibung trotzdem jederzeit fortsetzen, z.B. um ein weiteres Element hinzuzufügen.",
+      "   b) Erst wenn (a) für alle bisher genannten Elemente geklärt ist: gehe den GESAMTEN folgenden Leistungskatalog systematisch Punkt für Punkt durch, in dieser Reihenfolge, und frage zu jedem Punkt, der bisher weder genannt noch ausgeschlossen wurde, konkret und EINZELN nach (nie pauschal \"gibt es noch etwas?\"). Punkte, die für das konkrete Projekt offensichtlich nicht zutreffen (z.B. keine Fremdleitungsquerung erwähnt, kein Grundwasser in der Region), darfst du knapp und begründet überspringen, statt stur jeden Punkt abzufragen:",
+      "      1) Baustelleneinrichtung, Arbeitsvorbereitung, Verkehrsdienst/Signalisation und Schutz bestehender Werkleitungen (be.pct) – z.B. \"Mit wie viel % Baustelleneinrichtung/Verkehrssicherung soll ich rechnen?\"",
+      "      2) Sondierungen/Pickelschlitze zur Erkundung von Fremdleitungen (sond.m3, sond.einfHand) – z.B. \"Sind an dieser Leitung auch Sondierschlitze für Fremdleitungen nötig, und falls ja, grösstenteils von Hand?\"",
+      "      3) Kreuzungen/Querungen bestehender Werkleitungen oder Hindernisse (Strasse, Schiene, Gewässer, Fremdleitungen) (kreuz.*/mods.fremd) – z.B. \"Muss die Leitung bestehende Werkleitungen, eine Strasse oder ein Gewässer queren?\"",
+      "      4) Erschwernisse beim Aushub (z.B. Fels, beengte Platzverhältnisse, Verbau) – sofern im Tool als Feld vorhanden, sonst nur notieren",
+      "      5) Wasserhaltung (wasser.h/wasser.sumpf) – z.B. \"Muss mit Grundwasser gerechnet werden, das abgepumpt werden muss?\"",
+      "      6) Rückbau oder Anpassung bestehender Schächte (Schachtumbau: z.B. Schacht mit modus=\"deckel\" statt Neubau, oder Rückbau Altbeton/Platten bei bestehenden Schächten) – z.B. \"Müssen entlang der Strecke bestehende Schächte angepasst oder deren Deckel ersetzt werden?\"",
+      "      7) Oberflächen-/Belagswiederherstellung, falls bei einem Element noch nicht klar beantwortet (belag.*) – z.B. \"Welcher Belag wird nach dem Wiederherstellen vorgefunden – Teer, Pflaster, Naturboden?\"",
+      "      8) Rohrumhüllung, Leitungszone und Verfüllung, falls vom Standard (Kies/Betonkies) abweichend gewünscht – nur fragen, wenn ein Hinweis darauf besteht, dass der Standard nicht passt",
+      "      9) Kalibrierung, Abnahme, Übergabe und Bestandsdokumentation – nur fragen, falls im Tool ein entsprechendes Feld existiert und abweichend vom Standard sein könnte",
+      "      Gehe diese 9 Punkte für jedes bisher genannte Element bzw. das Projekt als Ganzes der Reihe nach durch und überspringe nur, was bereits geklärt oder klar irrelevant ist.",
+      "3. Stelle GENAU EINE konkrete Rückfrage (kurz, in der Sprache des Nutzers) in \"question\" – zuerst alle offenen Punkte aus (a), danach die aus (b) in der oben genannten Reihenfolge. Niemals mehrere Fragen gleichzeitig.",
+      "4. Erst wenn sowohl (a) als auch ALLE 9 Punkte aus (b) für alle bisher genannten Elemente und das Projekt abgeklärt sind (der Nutzer kann einen Punkt aus (b) auch verneinen oder du kannst ihn als offensichtlich irrelevant einstufen – beides zählt als abgeklärt): \"question\": null und \"done\": true. Beende den Dialog NIE vorzeitig, nur weil die Kerngrössen (a) stehen – (b) muss zuerst vollständig durchlaufen sein. Der Nutzer kann die Beschreibung trotzdem jederzeit fortsetzen, z.B. um ein weiteres Element hinzuzufügen.",
       "",
       "Nutze ausschliesslich die unten aufgeführten Feld-Codes für \"update\"; bei Auswahlfeldern (opts) ausschliesslich die aufgeführten Codes, nicht übersetzen.",
       "Zahlen: Dezimalpunkt, keine Tausendertrennzeichen, als String, z.B. \"80\" oder \"1.10\". Boolesche Felder: true/false.",
@@ -3351,44 +3361,48 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
   /* ---------- Spracherkennung ---------- */
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   var rec = null, recognizing = false;
-  var baseText = "", finalizedSoFar = "", finalizedCount = 0, autoSendTimer = null;
+  var baseText = "", autoSendTimer = null;
 
   function scheduleAutoSend() {
     clearTimeout(autoSendTimer);
     autoSendTimer = setTimeout(function () {
       if ($("#voiceText").value.trim() && !$("#voiceFill").disabled) {
         $("#voiceFill").click();
-        // Nur den sichtbaren Text zurücksetzen, NICHT finalizedCount: die Erkennung läuft ununterbrochen
-        // weiter (kein stop/start), ev.results wächst also nur an, der Zeiger muss mitwachsen statt
-        // auf 0 zu springen – sonst würde ein verspätetes onresult-Event aus der alten Sitzung den
-        // bereits gesendeten Text erneut ins Feld schreiben (Race Condition).
-        baseText = ""; finalizedSoFar = "";
+        baseText = "";
       }
-    }, 1200);
+    }, 900);
   }
 
+  // Jede Äusserung läuft in einer eigenen, frischen Erkennungs-Sitzung (continuous=false,
+  // nach jedem Satz automatischer Neustart über onend). So beginnt ev.results bei jedem
+  // onresult-Event garantiert wieder bei Index 0 für genau diesen einen Satz – kein
+  // sitzungsübergreifendes Mitzählen nötig, das auf manchen Browsern (u.a. iPad/Safari)
+  // zu verschmolzenen/doppelten Sätzen geführt hat.
   function setupRecognition() {
     if (!SR) { $("#voiceMic").disabled = true; $("#voiceStatus").textContent = tt("noSpeech"); return; }
-    rec = new SR(); rec.continuous = true; rec.interimResults = true;
+    rec = new SR(); rec.continuous = false; rec.interimResults = true;
     rec.onresult = function (ev) {
-      for (var i = finalizedCount; i < ev.results.length; i++) {
-        if (ev.results[i].isFinal) { finalizedSoFar += ev.results[i][0].transcript + " "; finalizedCount = i + 1; }
-        else break;
+      var finalTxt = "", interim = "";
+      for (var i = 0; i < ev.results.length; i++) {
+        if (ev.results[i].isFinal) finalTxt += ev.results[i][0].transcript + " ";
+        else interim += ev.results[i][0].transcript;
       }
-      var interim = "";
-      if (ev.results.length > 0 && !ev.results[ev.results.length - 1].isFinal) interim = ev.results[ev.results.length - 1][0].transcript;
-      $("#voiceText").value = baseText + finalizedSoFar + interim;
+      $("#voiceText").value = baseText + finalTxt + interim;
       $("#voiceStatus").textContent = interim;
+      if (finalTxt) baseText = $("#voiceText").value; // dieser Satz ist fertig erkannt, als Basis für den nächsten übernehmen
       scheduleAutoSend();
     };
-    rec.onerror = function (ev) { $("#voiceStatus").textContent = tt("err") + ev.error; recognizing = false; applyTexts(); };
+    rec.onerror = function (ev) {
+      if (ev.error === "no-speech" || ev.error === "aborted") return; // normal bei kurzen Pausen, onend startet neu
+      $("#voiceStatus").textContent = tt("err") + ev.error; recognizing = false; applyTexts();
+    };
     rec.onend = function () { if (recognizing) { try { rec.start(); } catch (e) {} } };
   }
 
   function toggleMic() {
     if (!rec) return;
     if (!recognizing) {
-      baseText = $("#voiceText").value ? $("#voiceText").value + " " : ""; finalizedSoFar = ""; finalizedCount = 0;
+      baseText = $("#voiceText").value ? $("#voiceText").value + " " : "";
       rec.lang = SPEECH_LANG[curLang()] || "de-CH";
       try { rec.start(); recognizing = true; } catch (e) {}
     } else {
@@ -3427,8 +3441,7 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
       if (!key && !sharedAvailable) { $("#voiceStatus").textContent = tt("noKey"); return; }
       if (!text) { $("#voiceStatus").textContent = tt("noText"); return; }
       addBubble("user", text);
-      $("#voiceText").value = ""; baseText = ""; finalizedSoFar = "";
-      if (!recognizing) finalizedCount = 0; // bei laufender Erkennung den Zeiger NICHT zurücksetzen (Race Condition, siehe scheduleAutoSend)
+      $("#voiceText").value = ""; baseText = "";
       $("#voiceStatus").textContent = tt("working"); $("#voiceFill").disabled = true;
       callLLM(key, model, text).then(function (json) {
         $("#voiceDebugOut").textContent = JSON.stringify(json, null, 1);
@@ -3449,9 +3462,8 @@ Object.assign(T.en, { h_zusKurz: "Summary by chapter (short version)" });
     };
     $("#voiceReset").onclick = function () {
       resetVoiceHistory(); resetVoiceElemMap();
-      clearTimeout(autoSendTimer); baseText = ""; finalizedSoFar = "";
-      if (recognizing) { recognizing = false; try { rec.stop(); } catch (e) {} } // sauber stoppen statt mittendrin den Zeiger zu kappen
-      finalizedCount = 0;
+      clearTimeout(autoSendTimer); baseText = "";
+      if (recognizing) { recognizing = false; try { rec.stop(); } catch (e) {} }
       $("#voiceText").value = "";
       $("#voiceDebugOut").textContent = ""; $("#voiceStatus").textContent = "";
       applyTexts(); greet();
